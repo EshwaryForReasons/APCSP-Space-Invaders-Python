@@ -1,6 +1,7 @@
 import pygame
 from Player import APlayer as APlayer
 from Rocket import ARocket as ARocket
+from Enemy import AEnemy as AEnemy
 
 class Main():
     screen = None
@@ -11,10 +12,10 @@ class Main():
     Wave = 0
     RocketsLeft = 30
 
-    Aliens = []
+    Enemies = []
     Rockets = []
 
-    def __init__(self, _height, _width):
+    def __init__(self, _width, _height):
         pygame.init()
         self.width = _width
         self.height = _height
@@ -23,7 +24,8 @@ class Main():
 
         self.bKeepOpen = True
 
-        self.Player = APlayer(self, _width/2, _height - 50)
+        self.Player = APlayer(self, _width/2, _height - 50) 
+        self.Generator = Generator(self)
 
         self.StartGameLoop()
 
@@ -42,8 +44,8 @@ class Main():
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.EndGameLoop()
-                #if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                   # self.Rockets.append(ARocket(self, self.Player.x, self.Player.y))
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                    self.Rockets.append(ARocket(self, self.Player.x, self.Player.y))
 
             #Get left and right events to move the player
             Pressed = pygame.key.get_pressed()
@@ -58,6 +60,14 @@ class Main():
             self.clock.tick(144)
             self.screen.fill((0, 0, 0))
 
+            #Show the enemies on screen every frame
+            for Enemy in self.Enemies:
+                Enemy.draw()
+                Enemy.checkCollision(self)
+
+                if(Enemy.y > self.height):
+                    bIsLoser = True
+
             #Show the rockets on screen every frame
             for Rocket in self.Rockets:
                 Rocket.Draw()
@@ -65,4 +75,12 @@ class Main():
             #Show player on screen every frame
             self.Player.draw()
 
-main = Main(600, 600)
+class Generator:
+    def __init__(self, game):
+        margin = 30
+        width = 50
+        for x in range(margin, game.width - margin, width):
+            for y in range(margin, int(game.height / 2), width):
+                game.Enemies.append(AEnemy(game, x, y))
+
+main = Main(1000, 600)
